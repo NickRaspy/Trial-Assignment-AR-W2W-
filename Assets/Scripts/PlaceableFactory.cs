@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.Events;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace TA_W2W
 {
@@ -9,6 +10,11 @@ namespace TA_W2W
         protected HashSet<Placeable> placeables = new();
 
         public abstract void Create(Placeable placeablePrototype, Vector3 position, UnityAction onPlaceAction = null);
+
+        public Placeable GetLastPlaceable()
+        {
+            return placeables.Last();
+        }
 
         protected void AddPlaceable(Placeable placeable)
         {

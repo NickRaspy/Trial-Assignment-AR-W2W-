@@ -1,65 +1,65 @@
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Events;
+using UnityEngine.Playables;
 using UnityEngine.XR.ARFoundation;
 
 namespace TA_W2W
 {
     public class PlaceableManager : MonoBehaviour
     {
-        [Header("AR")]
-        [SerializeField] private ARPlaneManager planeManager;
-
-        [Header("Raycast")]
-        [SerializeField] private ARRaycaster raycaster;
-
         [Header("Placeables")]
         [SerializeField] private PlaceableFactory factory;
         [SerializeField] private PlaceablesList list;
-
-        [Header("UI")]
-        [SerializeField] private PlaceableButton placeableButtonPrefab;
-        [SerializeField] private Transform placeableButtonContainer;
-        [SerializeField] private GameObject placeableSelectMenu;
-        [SerializeField] private GameObject mainMenu;
 
         [Header("Testing")]
         [SerializeField] private bool isTesting;
         [SerializeField] private Placeable testPlaceable;
 
         private Placeable selectedPlaceable;
-        private void Start()
+
+        public UnityAction OnPlacePrepare {  get; set; }
+        public UnityAction OnPlace { get; set; }
+        public void Init(UnityAction<Placeable> onPlaceablesInit)
         {
-            raycaster.OnRaycastHit += CreatePlaceable;
+            foreach (var placeable in list.placeables) onPlaceablesInit(placeable);
+        }
 
-            foreach (var placeable in list.placeables)
-            {
-                Instantiate(placeableButtonPrefab, placeableButtonContainer).Init(placeable, () => 
-                {
-                    selectedPlaceable = placeable;
+        public void PlacePrepare(Placeable placeable)
+        {
+            selectedPlaceable = placeable;
 
-                    placeableSelectMenu.SetActive(false);
-
-                    planeManager.enabled = true;
-                    
-                    raycaster.CanRaycast = true;
-                });
-            }
+            OnPlacePrepare?.Invoke();
         }
 
         public void CreatePlaceable(Vector3 position)
         {
             factory.Create(isTesting ? testPlaceable : selectedPlaceable, position);
 
-            mainMenu.SetActive(true);
+            selectedPlaceable = factory.GetLastPlaceable();
 
-            raycaster.CanRaycast = false;
+            OnPlace?.Invoke();
+        }
 
-            planeManager.enabled = false;
+        public void ChangeColor(Color color)
+        {
+            if(selectedPlaceable is Customizable customizable) customizable.Color = color;
+        }
 
-            foreach (var plane in planeManager.trackables)
-            {
-                Destroy(plane.gameObject);
-            }
+        public Color GetColor()
+        {
+            if (selectedPlaceable is Customizable customizable) return customizable.Color;
+            return Color.white;
+        }
+
+        public void PlayAnimation(string name)
+        {
+            if(selectedPlaceable is Animatable animatable) animatable.SetAnimation(name);
+        }
+
+        public IEnumerable<Placeable> GetPlaceables()
+        {
+            return list.placeables;
         }
     }
 }
