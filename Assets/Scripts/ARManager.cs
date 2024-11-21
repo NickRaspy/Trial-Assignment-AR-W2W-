@@ -13,12 +13,15 @@ namespace TA_W2W
         [Header("Raycast")]
         [SerializeField] private ARRaycaster raycaster;
 
-        public void SetActionOnRaycaster(UnityAction<Vector3> action) => raycaster.OnRaycastHit += action;
+        public void SetActionOnRaycaster(UnityAction<Vector3> ARaction, UnityAction<GameObject> objectAction, UnityAction nothingAction)
+        {
+            raycaster.OnRaycastHitARPlane += ARaction;
+            raycaster.OnRaycastHitObject += objectAction;
+            raycaster.OnRaycastHitNothing += nothingAction;
+        }
 
         public void TrackablesReset()
         {
-            raycaster.CanRaycast = false;
-
             planeManager.enabled = false;
 
             foreach (var plane in planeManager.trackables)
@@ -30,7 +33,5 @@ namespace TA_W2W
         }
 
         public void EnablePlaneDetection() => planeManager.enabled = true;
-
-        public void EnableRaycaster() => raycaster.CanRaycast = true;
     }
 }

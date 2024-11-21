@@ -44,8 +44,6 @@ public class ColorPicker : MonoBehaviour, IPointerDownHandler, IDragHandler, IPo
         rectTransform = transform as RectTransform;
         image = GetComponent<Image>();
 
-        h = s = v = 0;
-
         if (WrongShader())
         {
             Debug.LogWarning($"Color picker requires image material with {colorPickerShaderName} shader.");
@@ -141,6 +139,8 @@ public class ColorPicker : MonoBehaviour, IPointerDownHandler, IDragHandler, IPo
 
     private void ApplyColor()
     {
+        if(image ==  null) return;
+
         image.material.SetVector(_HSV, new Vector3(h, s, v));
 
         OnColorChanged?.Invoke(color);

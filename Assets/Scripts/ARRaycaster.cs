@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
+using UnityEngine.EventSystems;
 using UnityEngine.XR.ARFoundation;
 using UnityEngine.XR.ARSubsystems;
 
@@ -14,9 +15,14 @@ namespace TA_W2W
         private ARRaycastManager arRaycastManager;
         private List<ARRaycastHit> hits = new();
 
-        public UnityAction<Vector3> OnRaycastHit {  get; set; }
+        public UnityAction OnRaycastHitNothing { get; set; }
 
-        public bool CanRaycast { get; set; } = false;
+        public UnityAction<GameObject> OnRaycastHitObject {  get; set; }
+
+        public UnityAction<Vector3> OnRaycastHitARPlane {  get; set; }
+
+        private Ray ray;
+
         void Awake()
         {
             arRaycastManager = GetComponent<ARRaycastManager>();
@@ -24,14 +30,11 @@ namespace TA_W2W
 
         void Update()
         {
-            if (!CanRaycast) return;
-
-            Ray ray = new();
-
 #if UNITY_EDITOR
-            if (Input.GetMouseButtonDown(0))
+            if (Input.GetMouseButtonUp(0))
             {
                 ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+                RaycastCheck(ray);
             }
 #else
             if (Input.touchCount > 0)
@@ -43,16 +46,32 @@ namespace TA_W2W
                     ray = Camera.main.ScreenPointToRay(touch.position);
                 }
             }
-#endif
-            if (Physics.Raycast(ray, out RaycastHit hit))
+            else
             {
-                if (hit.collider.CompareTag(ignoreTag)) return;
+                RaycastCheck(ray);
+            }
+#endif
+            ray = new();
+        }
+
+        private void RaycastCheck(Ray ray)
+        {
+            if (EventSystem.current.IsPointerOverGameObject()) return;
+
+            RaycastHit hit;
+
+            if (Physics.Raycast(ray, out hit))
+            {
+                OnRaycastHitObject(hit.collider.gameObject);
             }
 
             if (arRaycastManager.Raycast(ray, hits, TrackableType.PlaneWithinPolygon))
             {
-                OnRaycastHit(hits[0].pose.position);
+                OnRaycastHitARPlane(hits[0].pose.position);
             }
+
+            if (hits.Count > 0 || hit.collider != null) return;
+            else OnRaycastHitNothing();
         }
     }
 }

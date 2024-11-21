@@ -16,8 +16,6 @@ namespace TA_W2W
 
             button = GetComponent<Button>();
 
-            print(button.targetGraphic);
-
             if(button.targetGraphic is Image image)
                 image.sprite = placeable.icon;
 

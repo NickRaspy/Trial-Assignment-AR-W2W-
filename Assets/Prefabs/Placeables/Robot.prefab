@@ -142,6 +142,7 @@ GameObject:
   - component: {fileID: 4431696429288425314}
   - component: {fileID: 3391730880048722493}
   - component: {fileID: 6799557329499282531}
+  - component: {fileID: 6631188577624127263}
   m_Layer: 0
   m_Name: Robot
   m_TagString: Placeable
@@ -225,6 +226,39 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   icon: {fileID: 21300000, guid: bfd388d9276c85b49b77602e81796b44, type: 3}
+  outline: {fileID: 6631188577624127263}
+  defaultColor: {r: 0.5921569, g: 0.2901961, b: 0.039215688, a: 1}
+  separatedRenderers:
+  - {fileID: 5978765720053037189}
+  - {fileID: 4326084875160175665}
+  - {fileID: 15117371192837312}
+  - {fileID: 6146670326049135922}
+  - {fileID: 7818880342183219288}
+  - {fileID: 6724466005015097193}
+  - {fileID: 4886254319310348254}
+  - {fileID: 3883247431507798260}
+  - {fileID: 8481482744991895391}
+  - {fileID: 5183060998633430885}
+  - {fileID: 8784750188138855001}
+  selectedMaterialName: Main
+--- !u!114 &6631188577624127263
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 876985724103552921}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5fea29bb7c508c244a1f805a5fd3fc4d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  outlineMode: 0
+  outlineColor: {r: 1, g: 1, b: 1, a: 1}
+  outlineWidth: 4
+  precomputeOutline: 0
+  bakeKeys: []
+  bakeValues: []
 --- !u!1 &915899515990451004
 GameObject:
   m_ObjectHideFlags: 0
