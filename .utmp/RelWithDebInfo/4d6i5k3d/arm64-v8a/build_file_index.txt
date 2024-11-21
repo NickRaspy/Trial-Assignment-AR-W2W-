@@ -1,0 +1,2 @@
+C:\Projects\Unity\Trial Assignment AR (W2W)\Library\Bee\Android\Prj\IL2CPP\Gradle\unityLibrary\src\main\cpp\CMakeLists.txt
+C:\Projects\Unity\Trial Assignment AR (W2W)\Library\Bee\Android\Prj\IL2CPP\Gradle\unityLibrary\src\main\cpp\GameActivity\CMakeLists.txt
