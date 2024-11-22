@@ -9,7 +9,8 @@ namespace TA_W2W
 
         public Sprite icon;
 
-        [SerializeField] private Outline outline;
+        //for animated arrow
+        [SerializeField] private Transform point;
 
         public void Place(Vector3 position)
         {
@@ -18,9 +19,6 @@ namespace TA_W2W
             OnPlace?.Invoke();
         }
 
-        public void ToggleOutline(bool enable)
-        {
-            if(outline != null) outline.enabled = enable;
-        }
+        public Vector3 GetPointPosition() { return point.position; }
     }
 }

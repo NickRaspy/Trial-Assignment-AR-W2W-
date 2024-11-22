@@ -12,11 +12,16 @@ namespace TA_W2W
         [SerializeField] private PlaceableFactory factory;
         [SerializeField] private PlaceablesList list;
 
+        [Header("Point")]
+        [SerializeField] private GameObject arrowPoint;
+
         [Header("Testing")]
         [SerializeField] private bool isTesting;
         [SerializeField] private Placeable testPlaceable;
 
         private Placeable selectedPlaceable;
+
+        private Placeable temporaryPlaceable;
 
         public UnityAction OnPlacePrepare {  get; set; }
         public UnityAction OnPlace { get; set; }
@@ -30,9 +35,9 @@ namespace TA_W2W
         {
             if (selectedPlaceable == placeable) return;
 
-            selectedPlaceable?.ToggleOutline(false);
+            arrowPoint.SetActive(placeable != null);
 
-            placeable?.ToggleOutline(true);
+            if(placeable != null) SetArrowPosition(placeable.GetPointPosition());
 
             selectedPlaceable = placeable;
 
@@ -41,7 +46,7 @@ namespace TA_W2W
 
         public void PlaceablePrepare(Placeable placeable)
         {
-            SetPlaceable(placeable);
+            temporaryPlaceable = placeable;
 
             PlacePrepare();
         }
@@ -50,19 +55,37 @@ namespace TA_W2W
 
         public void CreatePlaceable(Vector3 position)
         {
-            factory.Create(isTesting ? testPlaceable : selectedPlaceable, position);
+            factory.Create(isTesting ? testPlaceable : temporaryPlaceable, position);
 
             SetPlaceable(factory.GetLastPlaceable());
 
             OnPlace?.Invoke();
+
+            temporaryPlaceable = null;
+        }
+
+        public void DestroySelectedPlayable()
+        {
+            factory.RemovePlaceable(selectedPlaceable);
+
+            Destroy(selectedPlaceable.gameObject);
+
+            OnPlaceableSet?.Invoke(null);
+
+            arrowPoint.SetActive(false);
         }
 
         public void MovePlaceable(Vector3 position)
         {
             selectedPlaceable.Place(position);
 
+            SetArrowPosition(selectedPlaceable.GetPointPosition());
+
             OnPlace?.Invoke();
         }
+
+        private void SetArrowPosition(Vector3 position) => arrowPoint.transform.position = position;
+
         public void ChangeColor(Color color)
         {
             if(selectedPlaceable is Customizable customizable) customizable.Color = color;

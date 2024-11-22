@@ -30,25 +30,22 @@ namespace TA_W2W
 
         void Update()
         {
-#if UNITY_EDITOR
+#if UNITY_EDITOR || UNITY_STANDALONE
             if (Input.GetMouseButtonUp(0))
             {
                 ray = Camera.main.ScreenPointToRay(Input.mousePosition);
                 RaycastCheck(ray);
             }
-#else
+#elif UNITY_ANDROID
             if (Input.touchCount > 0)
             {
                 Touch touch = Input.GetTouch(0);
 
-                if (touch.phase == TouchPhase.Began)
+                if(touch.phase == TouchPhase.Ended)
                 {
                     ray = Camera.main.ScreenPointToRay(touch.position);
+                    RaycastCheck(ray);
                 }
-            }
-            else
-            {
-                RaycastCheck(ray);
             }
 #endif
             ray = new();
@@ -62,16 +59,20 @@ namespace TA_W2W
 
             if (Physics.Raycast(ray, out hit))
             {
-                OnRaycastHitObject(hit.collider.gameObject);
+                OnRaycastHitObject?.Invoke(hit.collider.gameObject);
             }
 
             if (arRaycastManager.Raycast(ray, hits, TrackableType.PlaneWithinPolygon))
             {
-                OnRaycastHitARPlane(hits[0].pose.position);
+                if (hits[0].trackable.gameObject.activeInHierarchy)
+                    OnRaycastHitARPlane?.Invoke(hits[0].pose.position);
+                else
+                    hits.Clear();
+
             }
 
             if (hits.Count > 0 || hit.collider != null) return;
-            else OnRaycastHitNothing();
+            else OnRaycastHitNothing?.Invoke();
         }
     }
 }

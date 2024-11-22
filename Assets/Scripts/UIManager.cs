@@ -22,6 +22,7 @@ namespace TA_W2W
         [SerializeField] private Button colorButton;
         [SerializeField] private Button animationsButton;
         [SerializeField] private Button editingButton;
+        [SerializeField] private Button removeButon;
         [SerializeField] private VisibleButton visibleButton;
 
         [Header("Popups")]
@@ -58,6 +59,10 @@ namespace TA_W2W
         }
 
         public void ToggleMainMenu(bool enable) => mainMenu.SetActive(enable);
+
+        public void ToggleVisibleButton(bool enable) => visibleButton.gameObject.SetActive(enable);
+
+        public void ToggleRemoveButton(bool enable) => removeButon.interactable = enable;
 
         public void ToggleColorButton(bool enable) => colorButton.interactable = enable;
 

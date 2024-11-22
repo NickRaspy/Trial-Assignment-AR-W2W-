@@ -24,14 +24,32 @@ namespace TA_W2W
         {
             planeManager.enabled = false;
 
+            TogglePlanes(false);
+
+/*            ARSession.Reset();*/
+        }
+
+        public void EnablePlaneDetection()
+        {
+            TogglePlanes(true);
+
+            planeManager.enabled = true;
+        }
+
+        private void TogglePlanes(bool enable)
+        {
+            foreach (var plane in planeManager.trackables)
+            {
+                plane.gameObject.SetActive(enable);
+            }
+        }
+
+        private void DestroyPlanes()
+        {
             foreach (var plane in planeManager.trackables)
             {
                 Destroy(plane.gameObject);
             }
-
-            ARSession.Reset();
         }
-
-        public void EnablePlaneDetection() => planeManager.enabled = true;
     }
 }

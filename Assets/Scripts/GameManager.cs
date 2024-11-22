@@ -57,6 +57,7 @@ namespace TA_W2W
                 mode = Mode.None;
                 ARManager.TrackablesReset();
                 UIManager.ToggleMainMenu(true);
+                UIManager.ToggleVisibleButton(true);
 
                 PlaceableCheck();
             };
@@ -65,16 +66,22 @@ namespace TA_W2W
             {
                 mode = mode == Mode.None ? Mode.Creation : mode;
                 ARManager.EnablePlaneDetection();
+
+                UIManager.ToggleColorPicker(false);
+                UIManager.ToggleAnimationPicker(false);
+                UIManager.ToggleVisibleButton(false);
             };
 
             placeableManager.OnPlaceableSet += placeable =>
             {
                 UIManager.SetIcon(placeable != null ? placeable.icon : null);
 
+                UIManager.ToggleEditingButton(placeable != null);
+
+                UIManager.ToggleRemoveButton(placeable != null);
+
                 if (placeable is Animatable animatable) UIManager.AnimationListInstall(animatable.AnimationNames);
                 else UIManager.AnimationListInstall(new());
-
-                UIManager.ToggleEditingButton(placeable != null);
             };
 
             placeableManager.Init(placeable =>
