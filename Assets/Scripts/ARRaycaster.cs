@@ -10,69 +10,74 @@ namespace TA_W2W
     [RequireComponent(typeof(ARRaycastManager))]
     public class ARRaycaster : MonoBehaviour
     {
-        [SerializeField] private string ignoreTag;
-
         private ARRaycastManager arRaycastManager;
-        private List<ARRaycastHit> hits = new();
+
+        private readonly List<ARRaycastHit> hits = new();
 
         public UnityAction OnRaycastHitNothing { get; set; }
+        public UnityAction<GameObject> OnRaycastHitObject { get; set; }
+        public UnityAction<Vector3> OnRaycastHitARPlane { get; set; }
 
-        public UnityAction<GameObject> OnRaycastHitObject {  get; set; }
-
-        public UnityAction<Vector3> OnRaycastHitARPlane {  get; set; }
-
-        private Ray ray;
-
-        void Awake()
+        private void Awake()
         {
             arRaycastManager = GetComponent<ARRaycastManager>();
         }
 
-        void Update()
+        private void Update()
         {
-#if UNITY_EDITOR || UNITY_STANDALONE
-            if (Input.GetMouseButtonUp(0))
+            if (IsInputDetected())
             {
-                ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-                RaycastCheck(ray);
-            }
-#elif UNITY_ANDROID
-            if (Input.touchCount > 0)
-            {
-                Touch touch = Input.GetTouch(0);
-
-                if(touch.phase == TouchPhase.Ended)
+                var ray = GetRayFromInput();
+                if (ray.HasValue)
                 {
-                    ray = Camera.main.ScreenPointToRay(touch.position);
-                    RaycastCheck(ray);
+                    RaycastCheck(ray.Value);
                 }
             }
+        }
+
+        private bool IsInputDetected()
+        {
+#if UNITY_EDITOR || UNITY_STANDALONE
+            return Input.GetMouseButtonUp(0);
+#elif UNITY_ANDROID
+            return Input.touchCount > 0 && Input.GetTouch(0).phase == TouchPhase.Ended;
+#else
+            return false;
 #endif
-            ray = new();
+        }
+
+        private Ray? GetRayFromInput()
+        {
+#if UNITY_EDITOR || UNITY_STANDALONE
+            return Camera.main.ScreenPointToRay(Input.mousePosition);
+#elif UNITY_ANDROID
+            return Camera.main.ScreenPointToRay(Input.GetTouch(0).position);
+#else
+            return null;
+#endif
         }
 
         private void RaycastCheck(Ray ray)
         {
             if (EventSystem.current.IsPointerOverGameObject()) return;
 
-            RaycastHit hit;
-
-            if (Physics.Raycast(ray, out hit))
+            if (Physics.Raycast(ray, out RaycastHit hit))
             {
                 OnRaycastHitObject?.Invoke(hit.collider.gameObject);
             }
 
-            if (arRaycastManager.Raycast(ray, hits, TrackableType.PlaneWithinPolygon))
+            if (arRaycastManager.Raycast(ray, hits, TrackableType.PlaneWithinPolygon) && hits[0].trackable.gameObject.activeInHierarchy)
             {
-                if (hits[0].trackable.gameObject.activeInHierarchy)
-                    OnRaycastHitARPlane?.Invoke(hits[0].pose.position);
-                else
-                    hits.Clear();
-
+                OnRaycastHitARPlane?.Invoke(hits[0].pose.position);
             }
-
-            if (hits.Count > 0 || hit.collider != null) return;
-            else OnRaycastHitNothing?.Invoke();
+            else
+            {
+                hits.Clear();
+                if (hit.collider == null)
+                {
+                    OnRaycastHitNothing?.Invoke();
+                }
+            }
         }
     }
 }

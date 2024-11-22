@@ -22,7 +22,7 @@ namespace TA_W2W
         [SerializeField] private Button colorButton;
         [SerializeField] private Button animationsButton;
         [SerializeField] private Button editingButton;
-        [SerializeField] private Button removeButon;
+        [SerializeField] private Button removeButton;
         [SerializeField] private VisibleButton visibleButton;
 
         [Header("Popups")]
@@ -34,26 +34,22 @@ namespace TA_W2W
 
         private void OnGUI()
         {
-            if((Event.current.type == EventType.MouseDown || Event.current.type == EventType.TouchDown) && !EventSystem.current.IsPointerOverGameObject())
+            if ((Event.current.type == EventType.MouseDown || Event.current.type == EventType.TouchDown) && !EventSystem.current.IsPointerOverGameObject())
                 HideAppearableMenus();
         }
+
         public void Init()
         {
-            colorButton.onClick.AddListener(() => colorPicker.gameObject.SetActive(!colorPicker.gameObject.activeInHierarchy));
-
-            visibleButton.SetVisibility = () => 
-            {
-                ToggleMainMenu(!mainMenu.activeInHierarchy);
-                return mainMenu.activeInHierarchy;
-            };
+            colorButton.onClick.AddListener(ToggleColorPickerVisibility);
+            visibleButton.SetVisibility = ToggleMainMenuVisibility;
         }
 
         public void CreatePlaceableButton(Placeable placeable, UnityAction onButtonCreate)
         {
-            Instantiate(placeableButtonPrefab, placeableButtonContainer).Init(placeable, () =>
+            var button = Instantiate(placeableButtonPrefab, placeableButtonContainer);
+            button.Init(placeable, () =>
             {
                 placeableSelectMenu.SetActive(false);
-
                 onButtonCreate();
             });
         }
@@ -62,7 +58,7 @@ namespace TA_W2W
 
         public void ToggleVisibleButton(bool enable) => visibleButton.gameObject.SetActive(enable);
 
-        public void ToggleRemoveButton(bool enable) => removeButon.interactable = enable;
+        public void ToggleRemoveButton(bool enable) => removeButton.interactable = enable;
 
         public void ToggleColorButton(bool enable) => colorButton.interactable = enable;
 
@@ -86,9 +82,7 @@ namespace TA_W2W
             colorButton.onClick.AddListener(() =>
             {
                 colorPicker.color = getColorFromObject();
-
-                colorPicker.gameObject.SetActive(!colorPicker.gameObject.activeInHierarchy);
-
+                ToggleColorPickerVisibility();
             });
             colorPicker.OnColorChanged += onColorChange;
         }
@@ -96,21 +90,26 @@ namespace TA_W2W
         public void AnimationPickerSetup(UnityAction<string> onAnimationSelect)
         {
             animationPicker.OnAnimationButtonClick += onAnimationSelect;
-
             animationsButton.onClick.RemoveAllListeners();
             animationsButton.onClick.AddListener(() =>
             {
-                animationPicker.gameObject.SetActive(!animationPicker.gameObject.activeInHierarchy);
-
+                ToggleAnimationPickerVisibility();
                 animationPicker.LoadButtons();
             });
         }
 
         public void AnimationListInstall(HashSet<string> list) => animationPicker.SetAnimationNames(list);
 
-        public void SetIcon(Sprite icon)
+        public void SetIcon(Sprite icon) => selectedPlaceableIcon.sprite = icon ?? emptyIcon;
+
+        private void ToggleColorPickerVisibility() => colorPicker.gameObject.SetActive(!colorPicker.gameObject.activeInHierarchy);
+
+        private void ToggleAnimationPickerVisibility() => animationPicker.gameObject.SetActive(!animationPicker.gameObject.activeInHierarchy);
+
+        private bool ToggleMainMenuVisibility()
         {
-            selectedPlaceableIcon.sprite = icon != null ? icon : (emptyIcon != null ? emptyIcon : null);
+            ToggleMainMenu(!mainMenu.activeInHierarchy);
+            return mainMenu.activeInHierarchy;
         }
     }
 }

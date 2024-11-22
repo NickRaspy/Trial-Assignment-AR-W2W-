@@ -1,8 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
-using UnityEngine.Playables;
-using UnityEngine.XR.ARFoundation;
 
 namespace TA_W2W
 {
@@ -20,15 +18,19 @@ namespace TA_W2W
         [SerializeField] private Placeable testPlaceable;
 
         private Placeable selectedPlaceable;
-
         private Placeable temporaryPlaceable;
 
-        public UnityAction OnPlacePrepare {  get; set; }
+        public UnityAction OnPlacePrepare { get; set; }
         public UnityAction OnPlace { get; set; }
         public UnityAction<Placeable> OnPlaceableSet { get; set; }
+
         public void Init(UnityAction<Placeable> onPlaceablesInit)
         {
-            foreach (var placeable in list.placeables) onPlaceablesInit(placeable);
+            if (onPlaceablesInit == null) return;
+            foreach (var placeable in list.placeables)
+            {
+                onPlaceablesInit(placeable);
+            }
         }
 
         public void SetPlaceable(Placeable placeable)
@@ -36,51 +38,51 @@ namespace TA_W2W
             if (selectedPlaceable == placeable) return;
 
             arrowPoint.SetActive(placeable != null);
-
-            if(placeable != null) SetArrowPosition(placeable.GetPointPosition());
+            if (placeable != null)
+            {
+                SetArrowPosition(placeable.GetPointPosition());
+            }
 
             selectedPlaceable = placeable;
-
             OnPlaceableSet?.Invoke(placeable);
         }
 
-        public void PlaceablePrepare(Placeable placeable)
+        public void PreparePlaceable(Placeable placeable)
         {
             temporaryPlaceable = placeable;
 
-            PlacePrepare();
+            PreparePlace();
         }
 
-        public void PlacePrepare() => OnPlacePrepare?.Invoke();
+        public void PreparePlace() => OnPlacePrepare?.Invoke();
 
         public void CreatePlaceable(Vector3 position)
         {
-            factory.Create(isTesting ? testPlaceable : temporaryPlaceable, position);
+            var placeableToCreate = isTesting ? testPlaceable : temporaryPlaceable;
+            if (placeableToCreate == null) return;
 
+            factory.Create(placeableToCreate, position);
             SetPlaceable(factory.GetLastPlaceable());
-
             OnPlace?.Invoke();
-
             temporaryPlaceable = null;
         }
 
-        public void DestroySelectedPlayable()
+        public void DestroySelectedPlaceable()
         {
+            if (selectedPlaceable == null) return;
+
             factory.RemovePlaceable(selectedPlaceable);
-
             Destroy(selectedPlaceable.gameObject);
-
             OnPlaceableSet?.Invoke(null);
-
             arrowPoint.SetActive(false);
         }
 
         public void MovePlaceable(Vector3 position)
         {
+            if (selectedPlaceable == null) return;
+
             selectedPlaceable.Place(position);
-
             SetArrowPosition(selectedPlaceable.GetPointPosition());
-
             OnPlace?.Invoke();
         }
 
@@ -88,27 +90,26 @@ namespace TA_W2W
 
         public void ChangeColor(Color color)
         {
-            if(selectedPlaceable is Customizable customizable) customizable.Color = color;
+            if (selectedPlaceable is Customizable customizable)
+            {
+                customizable.Color = color;
+            }
         }
 
-        public Color GetColor()
-        {
-            if (selectedPlaceable is Customizable customizable) return customizable.Color;
-            return Color.white;
-        }
+        public Color GetColor() => selectedPlaceable is Customizable customizable ? customizable.Color : Color.white;
 
         public void PlayAnimation(string name)
         {
-            if(selectedPlaceable is Animatable animatable) animatable.SetAnimation(name);
+            if (selectedPlaceable is Animatable animatable)
+            {
+                animatable.SetAnimation(name);
+            }
         }
 
-        public bool IsCustomizable() { return selectedPlaceable is Customizable; }
+        public bool IsCustomizable() => selectedPlaceable is Customizable;
 
-        public bool IsAnimatable() { return selectedPlaceable is Animatable; }
+        public bool IsAnimatable() => selectedPlaceable is Animatable;
 
-        public IEnumerable<Placeable> GetPlaceables()
-        {
-            return list.placeables;
-        }
+        public IEnumerable<Placeable> GetPlaceables() => list.placeables;
     }
 }
